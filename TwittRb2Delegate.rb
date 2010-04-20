@@ -39,7 +39,6 @@ class TwittRb2Delegate
   end
   
   def reload(sender)
-    NSLog "Reloading"
     @twitterEngine.setUsername(username, password:password)
     @twitterEngine.getFollowedTimelineSinceID(0, startingAtPage:0, count:20)
   end
@@ -47,7 +46,8 @@ class TwittRb2Delegate
   def statusesReceived(statuses, forRequest:identifier)
      @timeline = []
      statuses.each do |status|
-       @timeline << {user: status["user"]["name"],  tweet: status["text"]}
+       image = NSImage.alloc.initWithContentsOfURL(NSURL.URLWithString(status['user']['profile_image_url']))
+       @timeline << {user: image,  tweet: status["text"]}
      end
      self.tableView.reloadData
   end
@@ -57,10 +57,7 @@ class TwittRb2Delegate
   end
   
   def tableView(tableView, objectValueForTableColumn: column, row: row)
-    if row < @timeline.size - 1
-      return @timeline[row].valueForKey(column.identifier.to_sym)
-    end
-    return nil
+    return @timeline[row].valueForKey(column.identifier.to_sym)
   end
   
   private
