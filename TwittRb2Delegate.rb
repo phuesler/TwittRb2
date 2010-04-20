@@ -11,7 +11,6 @@ class TwittRb2Delegate
   attr_accessor :usernameField, :passwordField
   attr_accessor :username, :password
   attr_accessor :tableView, :statusLabel
-  attr_accessor :updates
   attr_accessor :reloadButton
   
   def initialize
@@ -39,11 +38,13 @@ class TwittRb2Delegate
   end
   
   def reload(sender)
+    startLoadingTweets
     @twitterEngine.setUsername(username, password:password)
     @twitterEngine.getFollowedTimelineSinceID(0, startingAtPage:0, count:20)
   end
   
   def sendUpdate(sender)
+    startLoadingTweets
     @twitterEngine.sendUpdate(sender.stringValue)
     sender.setTitleWithMnemonic("")
   end
@@ -52,12 +53,13 @@ class TwittRb2Delegate
     # return if it was a status update
     return if statuses.count == 1 and statuses.first["source_api_request_type"] == 5
     
-     @timeline = []
-     statuses.each do |status|
-       image = NSImage.alloc.initWithContentsOfURL(NSURL.URLWithString(status['user']['profile_image_url']))
-       @timeline << {user: image,  tweet: status["text"]}
-     end
-     self.tableView.reloadData
+    @timeline = []
+    statuses.each do |status|
+     image = NSImage.alloc.initWithContentsOfURL(NSURL.URLWithString(status['user']['profile_image_url']))
+     @timeline << {user: image,  tweet: status["text"]}
+    end
+    self.tableView.reloadData
+    finishLoadingTweets
   end
   
   def numberOfRowsInTableView(tableView)
@@ -73,5 +75,15 @@ class TwittRb2Delegate
   def hideCredentialsWindow(sender)
     NSApp.endSheet(credentialsWindow)
     credentialsWindow.orderOut(sender)
+  end
+  
+  def startLoadingTweets
+    reloadButton.enabled = false
+    statusLabel.stringValue = "Updating..."
+  end
+  
+  def finishLoadingTweets
+    reloadButton.enabled = true
+    statusLabel.stringValue = "Tweets refreshed..."
   end
 end
