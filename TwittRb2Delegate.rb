@@ -43,7 +43,15 @@ class TwittRb2Delegate
     @twitterEngine.getFollowedTimelineSinceID(0, startingAtPage:0, count:20)
   end
   
+  def sendUpdate(sender)
+    @twitterEngine.sendUpdate(sender.stringValue)
+    sender.setTitleWithMnemonic("")
+  end
+  
   def statusesReceived(statuses, forRequest:identifier)
+    # return if it was a status update
+    return if statuses.count == 1 and statuses.first["source_api_request_type"] == 5
+    
      @timeline = []
      statuses.each do |status|
        image = NSImage.alloc.initWithContentsOfURL(NSURL.URLWithString(status['user']['profile_image_url']))
