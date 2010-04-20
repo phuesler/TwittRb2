@@ -49,6 +49,16 @@ class TwittRb2Delegate
     sender.setTitleWithMnemonic("")
   end
   
+  def requestFailed(requestIdentifier, withError:error)
+    reloadButton.enabled = true
+    statusLabel.stringValue = "Error: #{error.localizedDescription}"
+  end
+  
+  def requestSucceeded(requestIdentifier)
+    reloadButton.enabled = true
+    statusLabel.stringValue = "Tweets refreshed..."
+  end
+  
   def statusesReceived(statuses, forRequest:identifier)
     # return if it was a status update
     return if statuses.count == 1 and statuses.first["source_api_request_type"] == 5
@@ -59,7 +69,6 @@ class TwittRb2Delegate
      @timeline << {user: image,  tweet: status["text"]}
     end
     self.tableView.reloadData
-    finishLoadingTweets
   end
   
   def numberOfRowsInTableView(tableView)
@@ -80,10 +89,5 @@ class TwittRb2Delegate
   def startLoadingTweets
     reloadButton.enabled = false
     statusLabel.stringValue = "Updating..."
-  end
-  
-  def finishLoadingTweets
-    reloadButton.enabled = true
-    statusLabel.stringValue = "Tweets refreshed..."
   end
 end
